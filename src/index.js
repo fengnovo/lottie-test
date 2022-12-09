@@ -1,7 +1,7 @@
 import lottie from "lottie-web"
-import a1 from './loading.json'
-import a2 from './data.json'
-import a3 from './404.json'
+import a1 from './public/loading.json'
+import a2 from './public/data.json'
+import a3 from './public/404.json'
 
 // const a1 = new URL('./src/loading.json', import.meta.url).href
 // const a2 = new URL('./src/data.json', import.meta.url).href
@@ -16,7 +16,7 @@ lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: true,
-    // path: 'src/loading.json'
+    // path: './src/public/loading.json'
     animationData: a1
     // animationData: new URL('./src/loading.json', import.meta.url).href,
 });
@@ -25,7 +25,7 @@ lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: true,
-    // path: 'src/data.json'
+    // path: './src/public/data.json'
     animationData: a2
     // animationData: new URL('./src/data.json', import.meta.url).href,
 });
@@ -34,7 +34,7 @@ lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: true,
-    // path: 'src/404.json'
+    // path: './src/public/404.json'
     animationData: a3
     // animationData: new URL('./src/404.json', import.meta.url).href,
 });
