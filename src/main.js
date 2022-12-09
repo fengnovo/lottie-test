@@ -1,7 +1,7 @@
-import lottie from "lottie-web";
-import a1 from "./public/loading.json";
-import a2 from "./public/data.json";
-import a3 from "./public/404.json";
+import lottie from 'lottie-web';
+import a1 from './public/loading.json';
+import a2 from './public/data.json';
+import a3 from './public/404.json';
 import './style.css';
 
 
@@ -12,31 +12,41 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import * as monaco from 'monaco-editor'
 
-const idFlow = document.getElementById("id-flow");
-const id404 = document.getElementById("id404");
-const idLoading = document.getElementById("id-loading");
+import { SandboxGlobalProxy, maybeAvailableSandbox } from './iFrameProxy';
+
+const idFlow = document.getElementById('id-flow');
+const id404 = document.getElementById('id404');
+const idLoading = document.getElementById('id-loading');
 lottie.loadAnimation({
     container: idLoading,
-    renderer: "svg",
+    renderer: 'svg',
     loop: true,
     autoplay: true,
     animationData: a1,
 });
 lottie.loadAnimation({
     container: idFlow,
-    renderer: "svg",
+    renderer: 'svg',
     loop: true,
     autoplay: true,
     animationData: a2,
 });
 lottie.loadAnimation({
     container: id404,
-    renderer: "svg",
+    renderer: 'svg',
     loop: true,
     autoplay: true,
     animationData: a3,
 });
 
+const compileTS = async (uri) => {
+    // 读取编译子线程
+    const tsWorker = await monaco.languages.typescript.getTypeScriptWorker();
+    const client = await tsWorker(uri);
+    const result = await client.getEmitOutput(uri.toString());
+    const files = result.outputFiles[0];
+    return files.text;
+};
 
 self.MonacoEnvironment = {
     getWorker(_, label) {
@@ -56,7 +66,6 @@ self.MonacoEnvironment = {
     },
 }
 let editor;
-
 const init = () => {
     monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
         noSemanticValidation: true,
@@ -68,8 +77,8 @@ const init = () => {
     })
 
     editor = monaco.editor.create(document.getElementById('codeEditBox'), {
-        value: '',//编辑器初始显示文字
-        language: 'javascript',//语言支持自行查阅
+        value: "window.fetch('https://cnodejs.org/api/v1/topic/5433d5e4e737cbe96dcef312').then(res => res.json()).then(data => console.log(data))",//编辑器初始显示文字
+        language: 'typescript',//语言支持自行查阅
         theme: 'vs-dark',//官方自带三种主题vs, hc-black, or vs-dark
         demoautomaticLayout: true,//自动布局
     })
@@ -77,7 +86,16 @@ const init = () => {
     // 监听值的变化
     editor.onDidChangeModelContent(() => {
         const value = editor.getValue() //给父组件实时返回最新文本
-        console.log(value);
     })
 }
 init();
+async function runCode() {
+    const tsJs = await compileTS(editor.getModel('typescript').uri);
+    const sharedGlobal = ['history'];
+    const globalProxy = new SandboxGlobalProxy(sharedGlobal);
+    maybeAvailableSandbox(tsJs, globalProxy);
+}
+
+document.getElementById('run').addEventListener('click', async () => {
+    await runCode()
+})
