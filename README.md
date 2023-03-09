@@ -3,7 +3,7 @@
 
 ## Recommended Setup
 ```
-npm install
-npm run dev
-npm run build
+pnpm install
+pnpm run dev
+pnpm run build
 ```

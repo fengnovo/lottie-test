@@ -2,6 +2,7 @@ import lottie from 'lottie-web';
 import a1 from './public/loading.json';
 import a2 from './public/data.json';
 import a3 from './public/404.json';
+// import a4 from './public/lottie/data.json';
 import './style.css';
 
 
@@ -14,9 +15,24 @@ import * as monaco from 'monaco-editor'
 
 import { SandboxGlobalProxy, maybeAvailableSandbox } from './iFrameProxy';
 
+const initLottieData = async() => {
+    let lottieData = (await import('./public/lottie/data.json')).default;
+    let imgObj = {};
+    for(let i = 0; i< 46; i++) {
+        imgObj[`image_${i}`] = new URL(`./public/lottie/images/img_${i}.png`, import.meta.url).href;
+    }
+    lottieData.assets.forEach(asset => {
+        if(imgObj[asset.id]) {
+            asset.u = '';
+            asset.p = imgObj[asset.id];
+        }
+    });
+    return lottieData;
+};
 const idFlow = document.getElementById('id-flow');
 const id404 = document.getElementById('id404');
 const idLoading = document.getElementById('id-loading');
+const idLottie = document.getElementById('id-lottie');
 lottie.loadAnimation({
     container: idLoading,
     renderer: 'svg',
@@ -38,6 +54,19 @@ lottie.loadAnimation({
     autoplay: true,
     animationData: a3,
 });
+
+let a4;
+
+initLottieData().then(a4 => {
+    lottie.loadAnimation({
+        container: idLottie,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: a4,
+    });
+});
+
 
 const compileTS = async (uri) => {
     // 读取编译子线程
